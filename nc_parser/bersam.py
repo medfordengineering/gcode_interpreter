@@ -3,60 +3,64 @@ import numpy as np
 
 aX = 0
 aY = 0
+test_points = []
 
-void stepperX(int dir){
-	aX += dir;
-	display.drawPixel(aX, aY,  SSD1306_WHITE);
-	display.display();
-}
+def stepperX(direction):
+	global aX 
+	aX += direction
+	test_points.append((aX,aY))
+	#display.drawPixel(aX, aY,  SSD1306_WHITE)
+	#display.display()
 
-void stepperY(int dir){
-	aY += dir;
-	display.drawPixel(aX, aY, SSD1306_WHITE);
-	display.display();
-}
 
-def line(dx, dy):
+def stepperY(direction):
+	global aY 
+	aY += direction
+	test_points.append((aX,aY))
+	#display.drawPixel(aX, aY, SSD1306_WHITE);
+	#display.display()
+
+def newline(dx, dy):
 
 	error = 0
 	d1 = dx
 	d2 = dy
 	limit = abs(dx)
 
-	sx = POS
-	sy = POS
+	sx = 1 
+	sy = 1 
 
-	if (dx <= 0): 
-		sx = NEG
- 	if (dy <= 0): 
-		sy = NEG
+	if dx <= 0: 
+		sx = -1 
+	if dy <= 0: 
+		sy = -1 
 
-  	if abs(dx) < abs(dy):
+	if abs(dx) < abs(dy):
 		limit = abs(dy)
 		d1 = dy
 		d2 = dx
 	
-	
 	for x in range(limit):
-
-    	if abs(dx) >= abs(dy):
+		# Always move either X or Y one step on each pass depending on initial values
+		if abs(dx) >= abs(dy):
 			stepperX(sx)
-    	else:
+		else:
 			stepperY(sy)
-    	error = abs(error + abs(d2))
 
-    	if (2 * error) >= abs(d1): 
-      		error = error - abs(d1)
-      		if abs(dx) >= abs(dy):
+		error = abs(error + abs(d2))
+		if (2 * error) >= abs(d1): 
+			error = error - abs(d1)
+
+			# Depending on error move the corresponding direction one step on each pass
+			if abs(dx) >= abs(dy):
 				stepperY(sy)
-      		else:
+			else:
 				stepperX(sx)
 
-
-def plotCord(x, y): 
+def plotLine(x, y): 
 	x = (x - aX)
 	y = (y - aY)
-	plotDelta(x, y)
+	newline(x, y)
 
 # note that this is only for counterclockwise
 def arc(x1, y1, x2, y2, r, d):
@@ -101,7 +105,7 @@ def complete(x, y, x2, y2):
 def same_octant(x,y,x2,y2):
     return np.sign(x) == np.sign(x2) and np.sign(y) == np.sign(y2) and np.sign(abs(x) - abs(y)) == np.sign(abs(x2) - abs(y2))
 
-def main():
+def test_arc():
 	#points = arc(300,0,277,144,300)
 	# start point + offset
 	xd = 165 - 78
@@ -120,6 +124,29 @@ def main():
 	#print(points)
 	plt.grid(axis='both')
 	plt.show()
+
+def test_line():
+	aX = 0
+	aY = 0
+	plotLine(15, 2)
+	x_val = [x[0] for x in test_points]
+	y_val = [x[1] for x in test_points]
+	plt.axis([-300, 300, -300, 300])
+	#plt.set_axisbelow(True)
+	plt.minorticks_on()
+# Customize the major grid
+	plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
+# Customize the minor grid
+	plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+	plt.plot(x_val, y_val)
+	#plt.grid(axis='both')
+	plt.show()
+	print(test_points)
+	
+
+def main():
+	test_line()
+	#test_arc()
 
 if __name__ == "__main__":
 	main()
