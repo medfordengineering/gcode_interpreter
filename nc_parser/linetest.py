@@ -1,44 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def newline(dx, dy):
-
-	error = 0
-	d1 = dx
-	d2 = dy
-	limit = abs(dx)
-
-	sx = 1 
-	sy = 1 
-
-	if dx <= 0: 
-		sx = -1 
-	if dy <= 0: 
-		sy = -1 
-
-	if abs(dx) < abs(dy):
-		limit = abs(dy)
-		d1 = dy
-		d2 = dx
-	
-	for x in range(limit):
-		# Always move either X or Y one step on each pass depending on initial values
-		if abs(dx) >= abs(dy):
-			stepperX(sx)
-		else:
-			stepperY(sy)
-
-		error = abs(error + abs(d2))
-		if (2 * error) >= abs(d1): 
-			error = error - abs(d1)
-
-			# Depending on error move the corresponding direction one step on each pass
-			if abs(dx) >= abs(dy):
-				stepperY(sy)
-			else:
-				stepperX(sx)
-
 def plotLine(x0, y0, x1, y1):
+	points = []
 	dx =  abs(x1-x0)
 	if  x0 < x1:
 		sx =  1 
@@ -54,8 +18,10 @@ def plotLine(x0, y0, x1, y1):
 	err = dx + dy
 
 	while True:
-		print('{}, {}'.format(x0,y0))
+		#print('{}, {}'.format(x0,y0))
+		points.append((x0, y0))
 		if x0 == x1 and y0 == y1:
+			return points
 			break
 		e2 = 2*err
 		if e2 >= dy:
@@ -66,30 +32,26 @@ def plotLine(x0, y0, x1, y1):
 			err += dx
 			y0 += sy
 
-def testLineQ1(x0,y0, x1,y1):
-	dx = x1 - x0
-	dy = y1 - y0
-	D = 2*dy - dx
-	y = y0
-
-    #for x from x0 to x1
-	for x in range(dx+1):
-		print('{}, {}'.format(x,y))
-		if D > 0:
-			y = y + 1
-			D = D - 2*dx
-		D = D + 2*dy
-
 def test_line():
-	#testLineQ1(0,0,15,15)
-	plotLine(-2,-5,6,9)
+	points = plotLine(-2,-5,6,9)
+	print(points)
+	print(type (points))
+	print(type (points[1]))
+	print(points[len(points) - 1][1])
+	#print('x0 = {}, y0 = {}'.format(points[len(points),0], points[len(points),1])
+
+	x_val = [x[0] for x in points]
+	y_val = [x[1] for x in points]
+	plt.axis([-300, 300, -300, 300])
+	plt.minorticks_on()
+	plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
+	plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+	plt.plot(x_val, y_val)
+	plt.show()
 
 def main():
 	test_line()
 
 if __name__ == "__main__":
 	main()
-
-
-
 
