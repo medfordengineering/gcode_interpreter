@@ -117,8 +117,8 @@ def parse_line():
 		gcode = {}
 		points = []
 		points_total = []
-		xi = 276 
-		yi = 212 
+		xi = 189
+		yi = 103
 		for line in fp:
 			mylist = line.split()
 			if not len(mylist) == 0:
