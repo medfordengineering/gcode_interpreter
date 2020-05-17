@@ -33,7 +33,7 @@ def arc(x1, y1, x2, y2, r, d):
 	while not complete(x,y,x2,y2):
 		x, y = nextStep(x,y,r,d)
 		points.append((x,y))
-		#print('{}, {}'.format(x, y))
+		print('{}, {}'.format(x, y))
 	return points
 
 def nextStep(x,y,r,d):
@@ -68,23 +68,44 @@ def complete(x, y, x2, y2):
 def same_octant(x,y,x2,y2):
     return np.sign(x) == np.sign(x2) and np.sign(y) == np.sign(y2) and np.sign(abs(x) - abs(y)) == np.sign(abs(x2) - abs(y2))
 
+def draw_lines(points):
+	x_val = [x[0]+xd for x in points] 
+	y_val = [x[1]+yd for x in points]
+	plt.axis([-300, 300, -300, 300])
+	plt.minorticks_on()
+	plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
+	plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+	plt.plot(x_val, y_val)
+	plt.show()
+
+
 def test_arc():
-	#points = arc(300,0,277,144,300)
-	# start point + offset
-	#xd = 165 - 78
-	#yd = 81 - 0
+	xi = 276
+	yi = 212
+	xf = 35
+	yf = 133
+	#xf = 250
+	#yf = 134
+	I = -133
+	J = 0
+	
+	r = int(round(math.sqrt(I**2 + J**2)))
+	xd = I + xi
+	yd = J + yi
+	xi = xi - xd
+	yi = yi - yd
+	xf = xf - xd	
+	yf = yf - yd
 
-	xd = 276 + 133
-	yd = 212 - 0
+	points = arc(xi,yi,xf,yf,r,'CW')
 
-	#points = arc(75 - xd,168 -yd,90 -xd,223 -yd,79,'CW')
-	#points = arc(165-xd, 81-yd, 14-xd, 83-yd, 76,'CW')
-	#points = arc(276, 212, 250, 134, 133,'CW')
-	points = arc(200,0,0,200,200,'CC')
-	x_val = [x[0]  for x in points] 
-	y_val = [x[1]  for x in points]
+#points = arc(200,0,0,200,200,'CC')
+	#points = arc(-30,90,80,-50,95,'CW')
+	x_val = [x[0]+xd for x in points] 
+	y_val = [x[1]+yd for x in points]
 
 	plt.axis([-300, 300, -300, 300])
+	#plt.axis([-15, 15, -15, 15])
 	plt.minorticks_on()
 	plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
 	plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
@@ -96,46 +117,65 @@ def parse_line():
 		gcode = {}
 		points = []
 		points_total = []
-		X0 = 276 
-		Y0 = 212 
+		xi = 276 
+		yi = 212 
 		for line in fp:
 			mylist = line.split()
 			if not len(mylist) == 0:
 				if mylist[0] == 'G1' and 'F' not in mylist[1]:
 					X1 = int(round(float(mylist[1].strip('X'))))
 					Y1 = int(round(float(mylist[2].strip('Y'))))
-					points = plotLine(X0, Y0, X1, Y1) 	
+					#points = plotLine(X0, Y0, X1, Y1) 	
 
 					#print(*points, sep = '\n')
 					print("point")
-					X0 = points[len(points) - 1][0]
-					Y0 = points[len(points) - 1][1]
-					points_total.extend(points)
+					#X0 = points[len(points) - 1][0]
+					#Y0 = points[len(points) - 1][1]
+					#points_total.extend(points)
 					#gcode = json.dumps({'G1':[ float(mylist[1].strip('X')), float(mylist[2].strip('Y'))]})
 					#gcode = json.dumps({'G1':[ int(round(float(mylist[1].strip('X')))), int(round(float(mylist[2].strip('Y'))))]})
 					#print(gcode)
-				elif mylist[0] == 'G2':
-					X1 = int(round(float(mylist[1].strip('X'))))
-					Y1 = int(round(float(mylist[2].strip('Y'))))
-					Xoff = X0 - int(round(float(mylist[3].strip('I'))))
-					Yoff = Y0 - int(round(float(mylist[4].strip('J'))))
-	
-					points = arc(75 - xd,168 -yd,90 -xd,223 -yd,79,'CW')
-	#
-					#opp = float (mylist[3].strip('I'))
-					#adj = float (mylist[4].strip('J'))
-					#radius = math.sqrt(opp**2 + adj**2)
-					#gcode = json.dumps({'G2':[ float(mylist[1].strip('X')), float(mylist[2].strip('Y')), radius]})
-				elif mylist[0] == 'G3':
-					opp = float (mylist[3].strip('I'))
-					adj = float (mylist[4].strip('J'))
-					radius = math.sqrt(opp**2 + adj**2)
-					gcode = json.dumps({'G3':[ float(mylist[1].strip('X')), float(mylist[2].strip('Y')), radius]})
-		print(*points_total, sep = '\n')
-		graph_line(points_total)
+				elif mylist[0] == 'G2' or mylist[0] == 'G3':
+					xf = int(round(float(mylist[1].strip('X'))))
+					yf = int(round(float(mylist[2].strip('Y'))))
+					I = int(round(float(mylist[3].strip('I'))))
+					J = int(round(float(mylist[4].strip('J'))))
 
+					r = int(round(math.sqrt(I**2 + J**2)))
+					xd = I + xi
+					yd = J + yi
+					xi = xi - xd
+					yi = yi - yd
+					xf = xf - xd	
+					yf = yf - yd
+
+					if mylist[0] == 'G2':
+						points = arc(xi,yi,xf,yf,r,'CW')
+					else:	
+						points = arc(xi,yi,xf,yf,r,'CC')
+
+					xi = points[len(points) -1][0] + xd
+					yi = points[len(points) -1][1] + yd
+					
+					points_total.extend(points)
+	#draw_lines(points)
+		x_val = [x[0]+xd for x in points_total] 
+		y_val = [x[1]+yd for x in points_total]
+
+		plt.axis([-300, 300, -300, 300])
+		#plt.axis([-15, 15, -15, 15])
+		plt.minorticks_on()
+		plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
+		plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+		plt.plot(x_val, y_val)
+		plt.show()
+
+
+					#gcode = json.dumps({'G2':[ float(mylist[1].strip('X')), float(mylist[2].strip('Y')), radius]})
+	
 def main():
-	test_arc()
+	#test_arc()
+	parse_line()
 
 if __name__ == "__main__":
 	main()
