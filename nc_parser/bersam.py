@@ -59,11 +59,11 @@ def error(x,y,r):
     return abs(np.square(x) + np.square(y) - np.square(r))
 
 def complete(x, y, x2, y2):
-    if same_octant(x, y, x2, y2):
-        if abs(x) > abs(y):
-            return y == y2
-        else:
-            return x == x2
+	if same_octant(x, y, x2, y2):
+		if abs(x) > abs(y):
+			return y == y2 
+		else:
+			return x == x2
 
 def same_octant(x,y,x2,y2):
     return np.sign(x) == np.sign(x2) and np.sign(y) == np.sign(y2) and np.sign(abs(x) - abs(y)) == np.sign(abs(x2) - abs(y2))
@@ -97,13 +97,15 @@ def test_arc():
 	xf = xf - xd	
 	yf = yf - yd
 
-	points = arc(xi,yi,xf,yf,r,'CW')
+	#points = arc(xi,yi,xf,yf,r,'CW')
 
-#points = arc(200,0,0,200,200,'CC')
+	points = arc(200,0,0,200,200,'CW')
 	#points = arc(-30,90,80,-50,95,'CW')
-	x_val = [x[0]+xd for x in points] 
-	y_val = [x[1]+yd for x in points]
+	#x_val = [x[0]+xd for x in points] 
+	#y_val = [x[1]+yd for x in points]
 
+	x_val = [x[0] for x in points] 
+	y_val = [x[1] for x in points]
 	plt.axis([-300, 300, -300, 300])
 	#plt.axis([-15, 15, -15, 15])
 	plt.minorticks_on()
@@ -116,9 +118,11 @@ def parse_line():
 	with open(filepath, 'r') as fp:
 		gcode = {}
 		points = []
-		points_total = []
-		xi = 189
-		yi = 103
+		#points_total = []
+		x_val_total = []
+		y_val_total = []
+		xi = 113
+		yi = 247
 		for line in fp:
 			mylist = line.split()
 			if not len(mylist) == 0:
@@ -154,20 +158,27 @@ def parse_line():
 					else:	
 						points = arc(xi,yi,xf,yf,r,'CC')
 
-					xi = points[len(points) -1][0] + xd
-					yi = points[len(points) -1][1] + yd
-					
-					points_total.extend(points)
-	#draw_lines(points)
-		x_val = [x[0]+xd for x in points_total] 
-		y_val = [x[1]+yd for x in points_total]
+					#xi = points[len(points) -1][0] + xd
+					#yi = points[len(points) -1][1] + yd
+					x_val = [x[0]+xd for x in points] 
+					y_val = [x[1]+yd for x in points]
 
+					xi = x_val[len(x_val) -1] 
+					yi = y_val[len(y_val) -1] 
+		
+					#xi = points[len(points) -1][0] 
+					#yi = points[len(points) -1][1]
+
+					x_val_total.extend(x_val)
+					y_val_total.extend(y_val)
+					#points_total.extend(points)
+	#draw_lines(points)
 		plt.axis([-300, 300, -300, 300])
 		#plt.axis([-15, 15, -15, 15])
 		plt.minorticks_on()
 		plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
 		plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-		plt.plot(x_val, y_val)
+		plt.plot(x_val_total, y_val_total)
 		plt.show()
 
 
