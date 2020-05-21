@@ -33,7 +33,8 @@ def arc(x1, y1, x2, y2, r, d):
 	while not complete(x,y,x2,y2):
 		x, y = nextStep(x,y,r,d)
 		points.append((x,y))
-		print('{}, {}'.format(x, y))
+		print('{}, {}xy'.format(x, y))
+		print('{}, {}x2y2'.format(x2, y2))
 	return points
 
 def nextStep(x,y,r,d):
@@ -60,6 +61,7 @@ def error(x,y,r):
 
 def complete(x, y, x2, y2):
 	if same_octant(x, y, x2, y2):
+		print('octant')
 		if abs(x) > abs(y):
 			return y == y2 
 		else:
@@ -121,8 +123,8 @@ def parse_line():
 		#points_total = []
 		x_val_total = []
 		y_val_total = []
-		xi = 113
-		yi = 247
+		xi = 130
+		yi = 290
 		for line in fp:
 			mylist = line.split()
 			if not len(mylist) == 0:
@@ -146,6 +148,7 @@ def parse_line():
 					J = int(round(float(mylist[4].strip('J'))))
 
 					r = int(round(math.sqrt(I**2 + J**2)))
+					print('{}radius'.format(r))
 					xd = I + xi
 					yd = J + yi
 					xi = xi - xd
@@ -163,8 +166,10 @@ def parse_line():
 					x_val = [x[0]+xd for x in points] 
 					y_val = [x[1]+yd for x in points]
 
-					xi = x_val[len(x_val) -1] 
-					yi = y_val[len(y_val) -1] 
+					#xi = x_val[len(x_val) -1] 
+					#yi = y_val[len(y_val) -1] 
+					xi = xf + xd
+					yi = yf + yd
 		
 					#xi = points[len(points) -1][0] 
 					#yi = points[len(points) -1][1]
