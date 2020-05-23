@@ -26,6 +26,37 @@ def stepperY(direction):
 	#display.drawPixel(aX, aY, SSD1306_WHITE);
 	#display.display()
 
+def plotLine(x0, y0, x1, y1):
+	points = []
+	dx =  abs(x1-x0)
+	if  x0 < x1:
+		sx =  1 
+	else:
+		sx = -1
+
+	dy = -abs(y1-y0)
+	if y0 < y1:
+		sy = 1
+	else:
+		sy = -1
+
+	err = dx + dy
+
+	while True:
+		#print('{}, {}'.format(x0,y0))
+		points.append((x0, y0))
+		if x0 == x1 and y0 == y1:
+			return points
+			break
+		e2 = 2*err
+		if e2 >= dy:
+			err += dy 
+			x0 += sx
+
+		if e2 <= dx: 
+			err += dx
+			y0 += sy
+
 def arc(x1, y1, x2, y2, r, d):
 	x = x1
 	y = y1
@@ -33,8 +64,7 @@ def arc(x1, y1, x2, y2, r, d):
 	while not complete(x,y,x2,y2):
 		x, y = nextStep(x,y,r,d)
 		points.append((x,y))
-		print('{}, {}xy'.format(x, y))
-		print('{}, {}x2y2'.format(x2, y2))
+		#print('{}, {}xy'.format(x, y))
 	return points
 
 def nextStep(x,y,r,d):
@@ -61,7 +91,6 @@ def error(x,y,r):
 
 def complete(x, y, x2, y2):
 	if same_octant(x, y, x2, y2):
-		print('octant')
 		if abs(x) > abs(y):
 			return y == y2 
 		else:
@@ -70,46 +99,8 @@ def complete(x, y, x2, y2):
 def same_octant(x,y,x2,y2):
     return np.sign(x) == np.sign(x2) and np.sign(y) == np.sign(y2) and np.sign(abs(x) - abs(y)) == np.sign(abs(x2) - abs(y2))
 
-def draw_lines(points):
-	x_val = [x[0]+xd for x in points] 
-	y_val = [x[1]+yd for x in points]
+def draw_lines(x_val, y_val):
 	plt.axis([-300, 300, -300, 300])
-	plt.minorticks_on()
-	plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
-	plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-	plt.plot(x_val, y_val)
-	plt.show()
-
-
-def test_arc():
-	xi = 276
-	yi = 212
-	xf = 35
-	yf = 133
-	#xf = 250
-	#yf = 134
-	I = -133
-	J = 0
-	
-	r = int(round(math.sqrt(I**2 + J**2)))
-	xd = I + xi
-	yd = J + yi
-	xi = xi - xd
-	yi = yi - yd
-	xf = xf - xd	
-	yf = yf - yd
-
-	#points = arc(xi,yi,xf,yf,r,'CW')
-
-	points = arc(200,0,0,200,200,'CW')
-	#points = arc(-30,90,80,-50,95,'CW')
-	#x_val = [x[0]+xd for x in points] 
-	#y_val = [x[1]+yd for x in points]
-
-	x_val = [x[0] for x in points] 
-	y_val = [x[1] for x in points]
-	plt.axis([-300, 300, -300, 300])
-	#plt.axis([-15, 15, -15, 15])
 	plt.minorticks_on()
 	plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
 	plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
@@ -120,27 +111,26 @@ def parse_line():
 	with open(filepath, 'r') as fp:
 		gcode = {}
 		points = []
-		#points_total = []
 		x_val_total = []
 		y_val_total = []
-		xi = 130
-		yi = 290
+		xi = 0
+		yi = 0
 		for line in fp:
 			mylist = line.split()
 			if not len(mylist) == 0:
 				if mylist[0] == 'G1' and 'F' not in mylist[1]:
-					X1 = int(round(float(mylist[1].strip('X'))))
-					Y1 = int(round(float(mylist[2].strip('Y'))))
-					#points = plotLine(X0, Y0, X1, Y1) 	
+					xf = int(round(float(mylist[1].strip('X'))))
+					yf = int(round(float(mylist[2].strip('Y'))))
+					points = plotLine(xi, xi, xf, yf) 	
 
-					#print(*points, sep = '\n')
-					print("point")
-					#X0 = points[len(points) - 1][0]
-					#Y0 = points[len(points) - 1][1]
-					#points_total.extend(points)
-					#gcode = json.dumps({'G1':[ float(mylist[1].strip('X')), float(mylist[2].strip('Y'))]})
-					#gcode = json.dumps({'G1':[ int(round(float(mylist[1].strip('X')))), int(round(float(mylist[2].strip('Y'))))]})
-					#print(gcode)
+					x_val = [x[0] for x in points] 
+					y_val = [x[1] for x in points]
+					x_val_total.extend(x_val)
+					y_val_total.extend(y_val)
+
+					xi = xf
+					yi = yf
+
 				elif mylist[0] == 'G2' or mylist[0] == 'G3':
 					xf = int(round(float(mylist[1].strip('X'))))
 					yf = int(round(float(mylist[2].strip('Y'))))
@@ -148,7 +138,6 @@ def parse_line():
 					J = int(round(float(mylist[4].strip('J'))))
 
 					r = int(round(math.sqrt(I**2 + J**2)))
-					print('{}radius'.format(r))
 					xd = I + xi
 					yd = J + yi
 					xi = xi - xd
@@ -161,36 +150,17 @@ def parse_line():
 					else:	
 						points = arc(xi,yi,xf,yf,r,'CC')
 
-					#xi = points[len(points) -1][0] + xd
-					#yi = points[len(points) -1][1] + yd
 					x_val = [x[0]+xd for x in points] 
 					y_val = [x[1]+yd for x in points]
+					x_val_total.extend(x_val)
+					y_val_total.extend(y_val)
 
-					#xi = x_val[len(x_val) -1] 
-					#yi = y_val[len(y_val) -1] 
 					xi = xf + xd
 					yi = yf + yd
 		
-					#xi = points[len(points) -1][0] 
-					#yi = points[len(points) -1][1]
-
-					x_val_total.extend(x_val)
-					y_val_total.extend(y_val)
-					#points_total.extend(points)
-	#draw_lines(points)
-		plt.axis([-300, 300, -300, 300])
-		#plt.axis([-15, 15, -15, 15])
-		plt.minorticks_on()
-		plt.grid(which='major', linestyle='solid', linewidth='0.5', color='red')
-		plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-		plt.plot(x_val_total, y_val_total)
-		plt.show()
-
-
-					#gcode = json.dumps({'G2':[ float(mylist[1].strip('X')), float(mylist[2].strip('Y')), radius]})
+		draw_lines(x_val_total, y_val_total)
 	
 def main():
-	#test_arc()
 	parse_line()
 
 if __name__ == "__main__":
