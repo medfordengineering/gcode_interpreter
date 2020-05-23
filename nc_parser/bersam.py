@@ -121,7 +121,7 @@ def parse_line():
 				if mylist[0] == 'G1' and 'F' not in mylist[1]:
 					xf = int(round(float(mylist[1].strip('X'))))
 					yf = int(round(float(mylist[2].strip('Y'))))
-					points = plotLine(xi, xi, xf, yf) 	
+					points = plotLine(xi, yi, xf, yf) 	
 
 					x_val = [x[0] for x in points] 
 					y_val = [x[1] for x in points]
