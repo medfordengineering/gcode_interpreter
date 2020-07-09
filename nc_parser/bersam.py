@@ -11,6 +11,9 @@ aX = 0
 aY = 0
 test_points = []
 
+#set error value here
+ep = 1 
+
 def stepperX(direction):
 	global aX 
 	aX += direction
@@ -45,7 +48,9 @@ def plotLine(x0, y0, x1, y1):
 	while True:
 		#print('{}, {}'.format(x0,y0))
 		points.append((x0, y0))
-		if x0 == x1 and y0 == y1:
+		#if x0 == x1 and y0 == y1:
+		# Check if x and y values are within acceptable error range
+		if abs(x0 - x1) < ep and abs(y0 - y1) < ep:
 			return points
 			break
 		e2 = 2*err
@@ -90,11 +95,16 @@ def error(x,y,r):
     return abs(np.square(x) + np.square(y) - np.square(r))
 
 def complete(x, y, x2, y2):
-	if same_octant(x, y, x2, y2):
-		if abs(x) > abs(y):
-			return y == y2 
-		else:
-			return x == x2
+	print('complete')
+	#if same_octant(x, y, x2, y2):
+	if abs(x) > abs(y):
+		print (abs(y - y2))
+		#return y == y2 
+		return abs(y - y2) < ep
+	else:
+		print( abs(x - x2))
+		#return x == x2
+		return abs(x - x2) < ep 
 
 def same_octant(x,y,x2,y2):
     return np.sign(x) == np.sign(x2) and np.sign(y) == np.sign(y2) and np.sign(abs(x) - abs(y)) == np.sign(abs(x2) - abs(y2))
@@ -116,11 +126,14 @@ def parse_line():
 		xi = 0
 		yi = 0
 		for line in fp:
+			print(line)
 			mylist = line.split()
 			if not len(mylist) == 0:
 				if mylist[0] == 'G1' and 'F' not in mylist[1]:
-					xf = int(round(float(mylist[1].strip('X'))))
-					yf = int(round(float(mylist[2].strip('Y'))))
+					#xf = int(round(float(mylist[1].strip('X'))))
+					#yf = int(round(float(mylist[2].strip('Y'))))
+					xf = float(mylist[1].strip('X'))
+					yf = float(mylist[2].strip('Y'))
 					points = plotLine(xi, yi, xf, yf) 	
 
 					x_val = [x[0] for x in points] 
@@ -132,12 +145,16 @@ def parse_line():
 					yi = yf
 
 				elif mylist[0] == 'G2' or mylist[0] == 'G3':
-					xf = int(round(float(mylist[1].strip('X'))))
-					yf = int(round(float(mylist[2].strip('Y'))))
-					I = int(round(float(mylist[3].strip('I'))))
-					J = int(round(float(mylist[4].strip('J'))))
+					#xf = int(round(float(mylist[1].strip('X'))))
+					#yf = int(round(float(mylist[2].strip('Y'))))
+					#I = int(round(float(mylist[3].strip('I'))))
+					#J = int(round(float(mylist[4].strip('J'))))
 
-					r = int(round(math.sqrt(I**2 + J**2)))
+					xf = float(mylist[1].strip('X'))
+					yf = float(mylist[2].strip('Y'))
+					I = float(mylist[3].strip('I'))
+					J = float(mylist[4].strip('J'))
+					r = math.sqrt(I**2 + J**2)
 					xd = I + xi
 					yd = J + yi
 					xi = xi - xd
@@ -148,6 +165,7 @@ def parse_line():
 					if mylist[0] == 'G2':
 						points = arc(xi,yi,xf,yf,r,'CW')
 					else:	
+						print('call arc')
 						points = arc(xi,yi,xf,yf,r,'CC')
 
 					x_val = [x[0]+xd for x in points] 
@@ -165,7 +183,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
-
-
 
